@@ -21,6 +21,46 @@ warn()  { printf "\033[1;33m⚠\033[0m %s\n" "$1"; }
 error() { printf "\033[1;31m✖\033[0m %s\n" "$1" >&2; exit 1; }
 
 ###############################################################################
+# Function: copy_to_clipboard
+# Cross-platform clipboard copy (macOS + Linux).
+###############################################################################
+copy_to_clipboard() {
+  local text="$1"
+  if command -v pbcopy >/dev/null 2>&1; then
+    echo "$text" | pbcopy
+  elif command -v xclip >/dev/null 2>&1; then
+    echo "$text" | xclip -selection clipboard
+  elif command -v xsel >/dev/null 2>&1; then
+    echo "$text" | xsel --clipboard --input
+  elif command -v wl-copy >/dev/null 2>&1; then
+    echo "$text" | wl-copy
+  else
+    return 1
+  fi
+}
+
+###############################################################################
+# Function: detect_shell_rc
+# Detects the user's shell config file.
+###############################################################################
+detect_shell_rc() {
+  local user_shell
+  user_shell=$(basename "${SHELL:-/bin/bash}")
+
+  case "$user_shell" in
+    zsh)  echo "$HOME/.zshrc" ;;
+    bash)
+      if [[ -f "$HOME/.bashrc" ]]; then
+        echo "$HOME/.bashrc"
+      elif [[ -f "$HOME/.bash_profile" ]]; then
+        echo "$HOME/.bash_profile"
+      fi
+      ;;
+    *)    echo "" ;;
+  esac
+}
+
+###############################################################################
 # Function: check_dependencies
 ###############################################################################
 check_dependencies() {
@@ -124,15 +164,8 @@ prompt_api_key() {
 save_api_key() {
   local api_key="$1"
 
-  # Detect shell config file
-  local shell_rc=""
-  if [[ -f "$HOME/.zshrc" ]]; then
-    shell_rc="$HOME/.zshrc"
-  elif [[ -f "$HOME/.bashrc" ]]; then
-    shell_rc="$HOME/.bashrc"
-  elif [[ -f "$HOME/.bash_profile" ]]; then
-    shell_rc="$HOME/.bash_profile"
-  fi
+  local shell_rc
+  shell_rc=$(detect_shell_rc)
 
   if [[ -n "$shell_rc" ]]; then
     # Remove old git-daily key if present
@@ -194,13 +227,18 @@ main() {
   echo ""
   echo "  ─────────────────────"
   echo ""
+  local shell_rc
+  shell_rc=$(detect_shell_rc)
+  local source_cmd="source ${shell_rc:-~/.bashrc}"
+
   warn "IMPORTANT: Run this to activate the key in your current terminal:"
   echo ""
-  echo "   source ~/.zshrc"
+  echo "   $source_cmd"
   echo ""
-  info "Copied to clipboard — just paste it in your terminal."
+  if copy_to_clipboard "$source_cmd"; then
+    info "Copied to clipboard — just paste it in your terminal."
+  fi
   echo ""
-  echo "source ~/.zshrc" | pbcopy
 }
 
 main
