@@ -142,7 +142,11 @@ save_api_key() {
     rm -f "${shell_rc}.bak"
     export OPENAI_API_KEY="$api_key"
     ok "API key saved to $shell_rc"
-    info "Run 'source $shell_rc' or open a new terminal to activate it"
+    echo ""
+    warn "IMPORTANT: Run this now to activate the key in your terminal:"
+    echo ""
+    echo "   source $shell_rc"
+    echo ""
   else
     warn "Could not detect shell config file. Add this manually:"
     echo "   export OPENAI_API_KEY=\"$api_key\""
