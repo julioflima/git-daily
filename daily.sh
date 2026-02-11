@@ -25,12 +25,13 @@ MODEL="gpt-4o-mini"
 ###############################################################################
 usage() {
   cat <<EOF
-Usage: $(basename "$0") [day^N | --print-range]
+Usage: $(basename "$0") [day^N] ["context"] [--print-range]
 
 Examples:
-  $(basename "$0") day^1         # Range: yesterday 00:00 to today 00:00
-  $(basename "$0") day^2         # Range: two full previous days
-  $(basename "$0") --print-range # Prints range and exits (for testing)
+  $(basename "$0") day^1                              # Yesterday full day
+  $(basename "$0") day^2                              # Two days ago
+  $(basename "$0") day^1 "focus on layout changes"    # With context
+  $(basename "$0") --print-range                      # Print date range only
 
 Environment Variables:
   OPENAI_API_KEY  Your OpenAI API key (required).
@@ -133,21 +134,26 @@ call_openai() {
   local commits="$1"
   local api_key="$2"
   local model="$3"
+  local context="${4:-}"
 
   local json_payload
   json_payload=$(jq -n \
   --arg model "$MODEL" \
   --arg commits "$commits" \
+  --arg context "$context" \
   '{
     model: $model,
     messages: [
       {
         role: "system",
-        content: "You summarize Git commit logs into clear, concise standup reports. Rules:\n- Merge all related commits into ONE bullet point — never repeat the same topic\n- The output must have FEWER bullets than the number of commits\n- Use past tense (Fixed, Added, Updated, Removed)\n- Focus on WHAT changed and WHY, not HOW\n- Skip trivial details like version bumps, typo fixes, or merge commits\n- Keep each bullet to one line\n- Output only the bullet points, no headers or extra text\n- Aim for 2-5 bullet points maximum, regardless of how many commits there are"
+        content: "You summarize Git commit logs into clear, concise standup reports. Rules:\n- Merge all related commits into ONE bullet point — never repeat the same topic\n- The output must have FEWER bullets than the number of commits\n- Use past tense (Fixed, Added, Updated, Removed)\n- Focus on WHAT changed and WHY, not HOW\n- Skip trivial details like version bumps, typo fixes, or merge commits\n- Keep each bullet to one line\n- Output only the bullet points, no headers or extra text\n- Aim for 2-5 bullet points maximum, regardless of how many commits there are\n- If extra context is provided, use it to guide emphasis and relevance"
       },
       {
         role: "user",
-        content: ("Summarize these commits for a daily standup:\n\n" + $commits)
+        content: (
+          "Summarize these commits for a daily standup:\n\n" + $commits +
+          if ($context | length) > 0 then "\n\nContext: " + $context else "" end
+        )
       }
     ],
     temperature: 0.1,
@@ -167,6 +173,7 @@ call_openai() {
 main() {
   local print_range=false
   local day_arg=""
+  local context=""
 
   # Parse all arguments
   for arg in "$@"; do
@@ -174,6 +181,7 @@ main() {
       --print-range) print_range=true ;;
       day*) day_arg="$arg" ;;
       --help|-h) usage ;;
+      *) context="$arg" ;;
     esac
   done
 
@@ -220,7 +228,7 @@ main() {
   echo "All quiet on the western front 💣🪖:"
 
   local summary
-  summary=$(call_openai "$commits" "$API_KEY" "$MODEL")
+  summary=$(call_openai "$commits" "$API_KEY" "$MODEL" "$context")
 
   echo
   echo "$summary"

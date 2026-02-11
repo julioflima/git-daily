@@ -13,6 +13,7 @@
   <a href="#how-it-works">How it works</a> •
   <a href="#usage">Usage</a> •
   <a href="#time-travel">Time Travel</a> •
+  <a href="#context">Context</a> •
   <a href="#requirements">Requirements</a>
 </p>
 
@@ -29,9 +30,8 @@ $ git daily
 
 All quiet on the western front 💣🪖:
 
-• Fixed a client-side hydration issue triggered by locale switching
-• Added a new sidebar panel for browsing translation memory
-• Updated Next.js to 15.1.2
+• Fixed a hydration issue triggered by locale switching
+• Added a translation memory sidebar panel
 ```
 
 ## Quickstart
@@ -40,17 +40,20 @@ All quiet on the western front 💣🪖:
 curl -fsSL https://raw.githubusercontent.com/julioflima/git-daily/main/install.sh | bash
 ```
 
-The installer will:
-- Check dependencies (`git`, `curl`, `jq`)
-- Clone the repo to `~/.git-daily`
-- Create the `git daily` alias
-- Optionally set your `OPENAI_API_KEY`
+The installer handles everything:
 
-Then just run it inside any repo:
+- ✔ Checks dependencies (`git`, `curl`, `jq`)
+- ✔ Installs to `~/.git-daily`
+- ✔ Creates the global `git daily` alias
+- ✔ Validates and saves your `OPENAI_API_KEY`
+
+Then just run it inside **any** repo:
 
 ```bash
 git daily
 ```
+
+Works globally — every repo, every branch.
 
 <details>
 <summary>Manual install</summary>
@@ -76,8 +79,8 @@ That's it. One command, instant standup.
 ```
 
 1. **Fetches** your recent commits from `git log` within a time range
-2. **Sends** them to OpenAI's API with a focused system prompt
-3. **Returns** a clean, concise bullet-point summary ready for Slack/standup
+2. **Sends** them to OpenAI with a focused prompt that merges related work
+3. **Returns** 2–5 concise bullet points — not one per commit, a real summary ready for Slack/standup
 
 ## Usage
 
@@ -94,6 +97,9 @@ git daily 'day^2'
 # Last Friday (5 days ago)
 git daily 'day^5'
 
+# Add context to guide the summary
+git daily 'day^1' "focus on layout changes"
+
 # Debug mode — just print the date range, no API call
 git daily --print-range
 git daily 'day^3' --print-range
@@ -103,24 +109,41 @@ git daily 'day^3' --print-range
 
 The `day^N` syntax lets you look back at any specific day — always a clean **24-hour window**:
 
-| Command             | Range                               |
-| ------------------- | ----------------------------------- |
-| `git daily`         | Yesterday 18:00 → now               |
-| `git daily 'day^1'` | Yesterday 00:00 → today 00:00       |
-| `git daily 'day^2'` | 2 days ago 00:00 → yesterday 00:00  |
+| Command | Range |
+|---------|-------|
+| `git daily` | Yesterday 18:00 → now |
+| `git daily 'day^1'` | Yesterday 00:00 → today 00:00 |
+| `git daily 'day^2'` | 2 days ago 00:00 → yesterday 00:00 |
 | `git daily 'day^3'` | 3 days ago 00:00 → 2 days ago 00:00 |
 
 > **Tip:** Use `--print-range` with any command to preview the time window without hitting the API.
 
+## Context
+
+Pass a quoted string to guide what the AI emphasizes:
+
+```bash
+# Highlight frontend work
+git daily "focus on layout and CSS changes"
+
+# Emphasize bug fixes
+git daily 'day^1' "highlight bug fixes only"
+
+# Prepare for a specific audience
+git daily "explain for a non-technical PM"
+```
+
+The context is appended to the prompt — your commits stay the same, but the summary shifts focus.
+
 ## Requirements
 
-| Tool             | Purpose             |
-| ---------------- | ------------------- |
-| `bash`           | Shell (macOS/Linux) |
-| `git`            | Commit history      |
-| `curl`           | API requests        |
-| `jq`             | JSON parsing        |
-| `OPENAI_API_KEY` | OpenAI API access   |
+| Tool | Purpose |
+|------|---------|
+| `bash` | Shell (macOS/Linux) |
+| `git` | Commit history |
+| `curl` | API requests |
+| `jq` | JSON parsing |
+| `OPENAI_API_KEY` | OpenAI API access |
 
 Works on **macOS** (BSD date) and **Linux** (GNU date) out of the box.
 
@@ -130,7 +153,7 @@ Edit the top of `daily.sh` to customize:
 
 ```bash
 AUTHOR_NAME="Julio Lima"    # Your git author name
-MODEL="gpt-3.5-turbo"       # OpenAI model to use
+MODEL="gpt-4o-mini"         # OpenAI model (fast + cheap)
 ```
 
 ## Why?
