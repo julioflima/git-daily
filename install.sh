@@ -188,7 +188,7 @@ main() {
   echo ""
   echo "  Now just cd into any repo and run:"
   echo ""
-  printf "    \033[1mgit daily\033[0m\n"  echo ""
+  printf "    \033[1mgit daily\033[0m\n\n"  echo ""
   echo "  Works globally — every repo, every branch. 🪖"
   echo ""
 }
