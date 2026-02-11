@@ -74,16 +74,27 @@ setup_alias() {
 }
 
 ###############################################################################
-# Function: setup_api_key
+# Function: validate_api_key
+# Makes a lightweight API call to check if the key is valid.
 ###############################################################################
-setup_api_key() {
-  if [[ -n "${OPENAI_API_KEY:-}" ]]; then
-    ok "OPENAI_API_KEY already set"
-    return
-  fi
+validate_api_key() {
+  local key="$1"
+  local status
+  status=$(curl -s -o /dev/null -w "%{http_code}" \
+    -H "Authorization: Bearer $key" \
+    "https://api.openai.com/v1/models")
 
+  [[ "$status" == "200" ]]
+}
+
+###############################################################################
+# Function: prompt_api_key
+# Asks the user for a key and saves it to their shell config.
+###############################################################################
+prompt_api_key() {
+  local reason="$1"
   echo ""
-  warn "OPENAI_API_KEY is not set in your environment."
+  warn "$reason"
   printf "   Enter your OpenAI API key (or press Enter to skip): "
   read -r api_key </dev/tty
 
@@ -92,6 +103,22 @@ setup_api_key() {
     echo "   export OPENAI_API_KEY=\"sk-...\""
     return
   fi
+
+  info "Validating API key..."
+  if ! validate_api_key "$api_key"; then
+    error "API key is invalid. Check your key and try again."
+  fi
+  ok "API key is valid"
+
+  save_api_key "$api_key"
+}
+
+###############################################################################
+# Function: save_api_key
+# Appends the key to the user's shell config file.
+###############################################################################
+save_api_key() {
+  local api_key="$1"
 
   # Detect shell config file
   local shell_rc=""
@@ -104,15 +131,43 @@ setup_api_key() {
   fi
 
   if [[ -n "$shell_rc" ]]; then
+    # Remove old git-daily key if present
+    sed -i.bak '/# git-daily/d; /OPENAI_API_KEY.*# git-daily/d' "$shell_rc" 2>/dev/null || true
     echo "" >> "$shell_rc"
     echo "# git-daily" >> "$shell_rc"
     echo "export OPENAI_API_KEY=\"$api_key\"" >> "$shell_rc"
-    ok "API key added to $shell_rc"
+    rm -f "${shell_rc}.bak"
+    ok "API key saved to $shell_rc"
     info "Run 'source $shell_rc' or open a new terminal to activate it"
   else
     warn "Could not detect shell config file. Add this manually:"
     echo "   export OPENAI_API_KEY=\"$api_key\""
   fi
+}
+
+###############################################################################
+# Function: setup_api_key
+###############################################################################
+setup_api_key() {
+  if [[ -n "${OPENAI_API_KEY:-}" ]]; then
+    info "Testing existing OPENAI_API_KEY..."
+    if validate_api_key "$OPENAI_API_KEY"; then
+      ok "OPENAI_API_KEY is valid"
+      return
+    else
+      warn "Existing OPENAI_API_KEY is invalid or expired."
+      printf "   Enter a new key? [Y/n] "
+      read -r answer </dev/tty
+      if [[ "$answer" =~ ^[Nn]$ ]]; then
+        warn "Keeping current key. Fix it later."
+        return
+      fi
+      prompt_api_key "Let's set a new API key."
+      return
+    fi
+  fi
+
+  prompt_api_key "OPENAI_API_KEY is not set in your environment."
 }
 
 ###############################################################################
@@ -131,7 +186,14 @@ main() {
 
   echo ""
   echo "  ─────────────────────"
-  ok "Done! Run 'git daily' inside any repo."
+  echo ""
+  ok "You're all set!"
+  echo ""
+  echo "  Now just cd into any repo and run:"
+  echo ""
+  echo "    \033[1mgit daily\033[0m"
+  echo ""
+  echo "  Works globally — every repo, every branch. 🪖"
   echo ""
 }
 
