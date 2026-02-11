@@ -62,7 +62,7 @@ setup_alias() {
   if [[ -n "$current" ]]; then
     warn "Git alias 'daily' already exists: $current"
     printf "   Overwrite? [y/N] "
-    read -r answer
+    read -r answer </dev/tty
     if [[ ! "$answer" =~ ^[Yy]$ ]]; then
       info "Skipped alias setup"
       return
@@ -85,7 +85,7 @@ setup_api_key() {
   echo ""
   warn "OPENAI_API_KEY is not set in your environment."
   printf "   Enter your OpenAI API key (or press Enter to skip): "
-  read -r api_key
+  read -r api_key </dev/tty
 
   if [[ -z "$api_key" ]]; then
     warn "Skipped API key setup. You'll need to set it later:"
