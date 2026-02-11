@@ -198,6 +198,9 @@ main() {
   echo ""
   echo "   source ~/.zshrc"
   echo ""
+  echo "source ~/.zshrc" | pbcopy
+  info "Copied to clipboard — just paste it in your terminal."
+  echo ""
 }
 
 main
