@@ -116,6 +116,9 @@ The `day^N` syntax lets you look back at any specific day — always a clean **2
 | `git daily 'day^2'` | 2 days ago 00:00 → yesterday 00:00 |
 | `git daily 'day^3'` | 3 days ago 00:00 → 2 days ago 00:00 |
 
+> **Note:** Both `^` and `ˆ` are accepted — `day^1` and `dayˆ1` do the same thing.  
+> On some macOS keyboards the caret key produces `ˆ` (modifier circumflex) instead of `^`, so git-daily handles both.
+
 > **Tip:** Use `--print-range` with any command to preview the time window without hitting the API.
 
 ## Context

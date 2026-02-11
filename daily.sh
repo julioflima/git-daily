@@ -33,6 +33,8 @@ Examples:
   $(basename "$0") day^1 "focus on layout changes"    # With context
   $(basename "$0") --print-range                      # Print date range only
 
+Note: Both ^ and ˆ (macOS modifier key) are accepted (day^1 = dayˆ1).
+
 Environment Variables:
   OPENAI_API_KEY  Your OpenAI API key (required).
 EOF
@@ -48,11 +50,20 @@ is_gnu_date() {
 }
 
 ###############################################################################
+# Function: normalize_caret
+# Replaces the macOS modifier circumflex ˆ (U+02C6) with ^ (U+005E).
+###############################################################################
+normalize_caret() {
+  printf '%s' "$1" | sed 's/\xCB\x86/^/g'
+}
+
+###############################################################################
 # Function: parse_day_arg
-# Parses input like "day^N" and returns N (defaults to 1).
+# Parses input like "day^N" or "dayˆN" and returns N (defaults to 1).
 ###############################################################################
 parse_day_arg() {
-  local arg="$1"
+  local arg
+  arg=$(normalize_caret "$1")
   local days=0
 
   if [[ "$arg" =~ ^day\^([0-9]+)$ ]]; then
