@@ -37,19 +37,31 @@ All quiet on the western front 💣🪖:
 ## Quickstart
 
 ```bash
-# 1. Clone it
-git clone https://github.com/juliolima/git-daily.git ~/git-daily
+curl -fsSL https://raw.githubusercontent.com/juliolima/git-daily/main/install.sh | bash
+```
 
-# 2. Set your OpenAI key
-export OPENAI_API_KEY="sk-..."
+The installer will:
+- Check dependencies (`git`, `curl`, `jq`)
+- Clone the repo to `~/.git-daily`
+- Create the `git daily` alias
+- Optionally set your `OPENAI_API_KEY`
 
-# 3. Create a global git alias
-git config --global alias.daily '!bash ~/git-daily/daily.sh'
+Then just run it inside any repo:
 
-# 4. Run it inside any repo
-cd your-project
+```bash
 git daily
 ```
+
+<details>
+<summary>Manual install</summary>
+
+```bash
+git clone https://github.com/juliolima/git-daily.git ~/.git-daily
+export OPENAI_API_KEY="sk-..."
+git config --global alias.daily '!bash ~/.git-daily/daily.sh'
+```
+
+</details>
 
 That's it. One command, instant standup.
 
