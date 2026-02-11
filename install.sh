@@ -95,22 +95,25 @@ prompt_api_key() {
   local reason="$1"
   echo ""
   warn "$reason"
-  printf "   Enter your OpenAI API key (or press Enter to skip): "
-  read -r api_key </dev/tty
 
-  if [[ -z "$api_key" ]]; then
-    warn "Skipped API key setup. You'll need to set it later:"
-    echo "   export OPENAI_API_KEY=\"sk-...\""
-    return
-  fi
+  while true; do
+    printf "   Enter your OpenAI API key: "
+    read -r api_key </dev/tty
 
-  info "Validating API key..."
-  if ! validate_api_key "$api_key"; then
-    error "API key is invalid. Check your key and try again."
-  fi
-  ok "API key is valid"
+    if [[ -z "$api_key" ]]; then
+      warn "A valid API key is required. git daily won't work without one."
+      continue
+    fi
 
-  save_api_key "$api_key"
+    info "Validating API key..."
+    if validate_api_key "$api_key"; then
+      ok "API key is valid"
+      save_api_key "$api_key"
+      return
+    else
+      warn "API key is invalid. Please try again."
+    fi
+  done
 }
 
 ###############################################################################
