@@ -3,12 +3,12 @@
 # git-daily installer
 #
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/juliolima/git-daily/main/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/julioflima/git-daily/main/install.sh | bash
 # -----------------------------------------------------------------------------
 
 set -euo pipefail
 
-REPO_URL="https://github.com/juliolima/git-daily.git"
+REPO_URL="https://github.com/julioflima/git-daily.git"
 INSTALL_DIR="$HOME/.git-daily"
 
 ###############################################################################

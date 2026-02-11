@@ -37,7 +37,7 @@ All quiet on the western front 💣🪖:
 ## Quickstart
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/juliolima/git-daily/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/julioflima/git-daily/main/install.sh | bash
 ```
 
 The installer will:
@@ -56,7 +56,7 @@ git daily
 <summary>Manual install</summary>
 
 ```bash
-git clone https://github.com/juliolima/git-daily.git ~/.git-daily
+git clone https://github.com/julioflima/git-daily.git ~/.git-daily
 export OPENAI_API_KEY="sk-..."
 git config --global alias.daily '!bash ~/.git-daily/daily.sh'
 ```
