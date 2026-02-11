@@ -10,6 +10,7 @@ set -euo pipefail
 
 REPO_URL="https://github.com/julioflima/git-daily.git"
 INSTALL_DIR="$HOME/.git-daily"
+API_KEY_CHANGED=false
 
 ###############################################################################
 # Function: info / warn / error
@@ -178,6 +179,7 @@ save_api_key() {
     echo "export OPENAI_API_KEY=\"$api_key\"" >> "$shell_rc"
     rm -f "${shell_rc}.bak"
     ok "API key saved to $shell_rc"
+    API_KEY_CHANGED=true
   else
     warn "Could not detect shell config file. Add this manually:"
     echo "   export OPENAI_API_KEY=\"$api_key\""
@@ -228,20 +230,23 @@ main() {
   echo ""
   echo "  Works globally — every repo, every branch. 🪖"
   echo ""
-  echo "  ─────────────────────"
-  echo ""
-  local shell_rc
-  shell_rc=$(detect_shell_rc)
-  local source_cmd="source ${shell_rc:-~/.bashrc}"
 
-  warn "IMPORTANT: Run this to activate the key in your current terminal:"
-  echo ""
-  echo "   $source_cmd"
-  echo ""
-  if copy_to_clipboard "$source_cmd"; then
-    info "Copied to clipboard — just paste it in your terminal."
+  if [[ "$API_KEY_CHANGED" == true ]]; then
+    echo "  ─────────────────────"
+    echo ""
+    local shell_rc
+    shell_rc=$(detect_shell_rc)
+    local source_cmd="source ${shell_rc:-~/.bashrc}"
+
+    warn "IMPORTANT: Run this to activate the key in your current terminal:"
+    echo ""
+    echo "   $source_cmd"
+    echo ""
+    if copy_to_clipboard "$source_cmd"; then
+      info "Copied to clipboard — just paste it in your terminal."
+    fi
+    echo ""
   fi
-  echo ""
 }
 
 main

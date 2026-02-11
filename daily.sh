@@ -143,7 +143,7 @@ call_openai() {
     messages: [
       {
         role: "system",
-        content: "You summarize Git commit logs into clear, concise standup reports. Rules:\n- Group related commits into a single bullet point\n- Use past tense (Fixed, Added, Updated, Removed)\n- Focus on WHAT changed and WHY, not HOW\n- Skip trivial details like version bumps unless they are significant\n- Keep each bullet to one line\n- Output only the bullet points, no headers or extra text"
+        content: "You summarize Git commit logs into clear, concise standup reports. Rules:\n- Merge all related commits into ONE bullet point — never repeat the same topic\n- The output must have FEWER bullets than the number of commits\n- Use past tense (Fixed, Added, Updated, Removed)\n- Focus on WHAT changed and WHY, not HOW\n- Skip trivial details like version bumps, typo fixes, or merge commits\n- Keep each bullet to one line\n- Output only the bullet points, no headers or extra text\n- Aim for 2-5 bullet points maximum, regardless of how many commits there are"
       },
       {
         role: "user",
