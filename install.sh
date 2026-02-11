@@ -62,9 +62,9 @@ setup_alias() {
 
   if [[ -n "$current" ]]; then
     ask "Git alias 'daily' already exists: $current"
-    printf "   Overwrite? [y/N] "
+    printf "   Overwrite? [Y/n] "
     read -r answer </dev/tty
-    if [[ ! "$answer" =~ ^[Yy]$ ]]; then
+    if [[ "$answer" =~ ^[Nn]$ ]]; then
       info "Skipped alias setup"
       return
     fi
@@ -141,8 +141,7 @@ save_api_key() {
     echo "# git-daily" >> "$shell_rc"
     echo "export OPENAI_API_KEY=\"$api_key\"" >> "$shell_rc"
     rm -f "${shell_rc}.bak"
-    source "$shell_rc"
-    ok "API key saved and loaded from $shell_rc"
+    ok "API key saved to $shell_rc"
   else
     warn "Could not detect shell config file. Add this manually:"
     echo "   export OPENAI_API_KEY=\"$api_key\""
