@@ -27,16 +27,19 @@ error() { printf "\033[1;31m✖\033[0m %s\n" "$1" >&2; exit 1; }
 copy_to_clipboard() {
   local text="$1"
   if command -v pbcopy >/dev/null 2>&1; then
-    echo "$text" | pbcopy
+    printf '%s' "$text" | pbcopy
+    return 0
   elif command -v xclip >/dev/null 2>&1; then
-    echo "$text" | xclip -selection clipboard
+    printf '%s' "$text" | xclip -selection clipboard
+    return 0
   elif command -v xsel >/dev/null 2>&1; then
-    echo "$text" | xsel --clipboard --input
+    printf '%s' "$text" | xsel --clipboard --input
+    return 0
   elif command -v wl-copy >/dev/null 2>&1; then
-    echo "$text" | wl-copy
-  else
-    return 1
+    printf '%s' "$text" | wl-copy
+    return 0
   fi
+  return 1
 }
 
 ###############################################################################
