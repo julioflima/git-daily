@@ -156,12 +156,6 @@ setup_api_key() {
       return
     else
       warn "Existing OPENAI_API_KEY is invalid or expired."
-      printf "   Enter a new key? [Y/n] "
-      read -r answer </dev/tty
-      if [[ "$answer" =~ ^[Nn]$ ]]; then
-        warn "Keeping current key. Fix it later."
-        return
-      fi
       prompt_api_key "Let's set a new API key."
       return
     fi
