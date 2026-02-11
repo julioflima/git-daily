@@ -101,8 +101,14 @@ install_repo() {
 # Function: setup_alias
 ###############################################################################
 setup_alias() {
+  local expected="!bash $INSTALL_DIR/daily.sh"
   local current
   current=$(git config --global alias.daily 2>/dev/null || echo "")
+
+  if [[ "$current" == "$expected" ]]; then
+    ok "Git alias already configured"
+    return
+  fi
 
   if [[ -n "$current" ]]; then
     ask "Git alias 'daily' already exists: $current"
@@ -114,7 +120,7 @@ setup_alias() {
     fi
   fi
 
-  git config --global alias.daily "!bash $INSTALL_DIR/daily.sh"
+  git config --global alias.daily "$expected"
   ok "Git alias created → git daily"
 }
 
