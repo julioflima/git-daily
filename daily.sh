@@ -18,7 +18,7 @@ set -euo pipefail
 ###############################################################################
 AUTHOR_NAME="Julio Lima"
 API_KEY="${OPENAI_API_KEY}"  # Ensure this env var is set
-MODEL="gpt-3.5-turbo"
+MODEL="gpt-4o-mini"
 
 ###############################################################################
 # Function: usage
@@ -137,8 +137,22 @@ call_openai() {
   local json_payload
   json_payload=$(jq -n \
   --arg model "$MODEL" \
-  --arg prompt "Summarize these Git commits into a concise bullet-point report:\n\n$commits" \
-  '{model: $model, messages: [{role: "system", content: "You are a software engineer working as frontender, doing things using Next.JS. Summarizes Git commit logs into concise reports. You work at Tolq.com, a company of translation assisted by humans and AI."}, {role: "user", content: $prompt}], temperature: 0.1}')
+  --arg commits "$commits" \
+  '{
+    model: $model,
+    messages: [
+      {
+        role: "system",
+        content: "You summarize Git commit logs into clear, concise standup reports. Rules:\n- Group related commits into a single bullet point\n- Use past tense (Fixed, Added, Updated, Removed)\n- Focus on WHAT changed and WHY, not HOW\n- Skip trivial details like version bumps unless they are significant\n- Keep each bullet to one line\n- Output only the bullet points, no headers or extra text"
+      },
+      {
+        role: "user",
+        content: ("Summarize these commits for a daily standup:\n\n" + $commits)
+      }
+    ],
+    temperature: 0.1,
+    max_tokens: 512
+  }')
 
   curl -s -X POST "https://api.openai.com/v1/chat/completions" \
     -H "Content-Type: application/json" \
