@@ -16,6 +16,7 @@ INSTALL_DIR="$HOME/.git-daily"
 ###############################################################################
 info()  { printf "\033[1;34m▸\033[0m %s\n" "$1"; }
 ok()    { printf "\033[1;32m✔\033[0m %s\n" "$1"; }
+ask()   { printf "\033[1;35m?\033[0m %s\n" "$1"; }
 warn()  { printf "\033[1;33m⚠\033[0m %s\n" "$1"; }
 error() { printf "\033[1;31m✖\033[0m %s\n" "$1" >&2; exit 1; }
 
@@ -60,7 +61,7 @@ setup_alias() {
   current=$(git config --global alias.daily 2>/dev/null || echo "")
 
   if [[ -n "$current" ]]; then
-    warn "Git alias 'daily' already exists: $current"
+    ask "Git alias 'daily' already exists: $current"
     printf "   Overwrite? [y/N] "
     read -r answer </dev/tty
     if [[ ! "$answer" =~ ^[Yy]$ ]]; then
@@ -94,14 +95,14 @@ validate_api_key() {
 prompt_api_key() {
   local reason="$1"
   echo ""
-  warn "$reason"
+  ask "$reason"
 
   while true; do
     printf "   Enter your OpenAI API key: "
     read -r api_key </dev/tty
 
     if [[ -z "$api_key" ]]; then
-      warn "A valid API key is required. git daily won't work without one."
+      ask "A valid API key is required. git daily won't work without one."
       continue
     fi
 
@@ -111,7 +112,7 @@ prompt_api_key() {
       save_api_key "$api_key"
       return
     else
-      warn "API key is invalid. Please try again."
+      ask "API key is invalid. Please try again."
     fi
   done
 }
@@ -158,7 +159,7 @@ setup_api_key() {
       ok "OPENAI_API_KEY is valid"
       return
     else
-      warn "Existing OPENAI_API_KEY is invalid or expired."
+      ask "Existing OPENAI_API_KEY is invalid or expired."
       prompt_api_key "Let's set a new API key."
       return
     fi
@@ -173,6 +174,7 @@ setup_api_key() {
 main() {
   echo ""
   echo "  🪖 git-daily installer"
+  echo ""
   echo "  ─────────────────────"
   echo ""
 
@@ -180,7 +182,6 @@ main() {
   install_repo
   setup_alias
   setup_api_key
-
   echo ""
   echo "  ─────────────────────"
   echo ""
@@ -191,6 +192,10 @@ main() {
   printf "    \033[1mgit daily\033[0m\n"
   echo ""
   echo "  Works globally — every repo, every branch. 🪖"
+  echo ""
+  warn "Run this to activate the key in your current terminal:"
+  echo ""
+  echo "   source ~/.zshrc"
   echo ""
 }
 
