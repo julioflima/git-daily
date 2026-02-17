@@ -16,7 +16,7 @@ set -euo pipefail
 ###############################################################################
 # Global Variables
 ###############################################################################
-AUTHOR_NAME="Julio Lima"
+AUTHOR_NAME=$(git config user.name)
 API_KEY="${OPENAI_API_KEY}"  # Ensure this env var is set
 MODEL="gpt-4o-mini"
 
@@ -132,9 +132,11 @@ fetch_commits() {
   local since_time="$2"
   local until_time="$3"
 
-  git --no-pager log --author="$author" \
+  git --no-pager log \
+    --author="$author" \
     --since="$since_time" \
     --until="$until_time" \
+    --no-merges \
     --pretty=format:"- %h %s"
 }
 
@@ -219,6 +221,7 @@ main() {
     exit 1
   fi
 
+  echo "💻 Author: $AUTHOR_NAME"
   echo "💻 Fetching commits from $since_time to $until_time:"
 
   local commits
